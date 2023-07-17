@@ -1,1 +1,2 @@
 # AutomateCom
+Garage AI Automatisation est un projet qui vise à réaliser plusieurs scripts Python pour automatiser des process internes de l'association. Les garagistes sont plus focus à créer des choses, mais il n'y a pas forcément l'infrastructure qui leur permet de facilement communiquer sur ce qu'ils font et s'organiser entre eux.
