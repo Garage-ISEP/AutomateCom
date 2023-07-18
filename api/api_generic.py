@@ -1,6 +1,6 @@
 import os
 import textwrap
-#from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 import openai
 
 openai.api_key = os.getenv("OPENAI_APIKEY")
