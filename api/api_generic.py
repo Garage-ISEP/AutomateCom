@@ -19,6 +19,76 @@ def generate_text(title):
     generated_text = response.choices[0].text.strip()
     return generated_text
 
+def get_optimal_font_size(text, font_path, zone_width, zone_height):
+    """
+    Estimate the optimal font size that fits the given text within the specified zone.
+
+    Parameters:
+        text (str): The text to be placed on the image.
+        font_path (str): The path to the TrueType font file (e.g., ".ttf") to be used.
+        zone_width (int): The width of the zone where the text will be placed.
+        zone_height (int): The height of the zone where the text will be placed.
+
+    Returns:
+        int: The calculated optimal font size that fits the text within the zone.
+    """
+    img = Image.new("RGB", (1000, 1000), color="white")  # Create a temporary image to estimate the font size
+    draw = ImageDraw.Draw(img)
+    font_size = 1
+
+    # Load the font
+    try:
+        font = ImageFont.truetype(font_path, font_size)
+    except IOError:
+        raise Exception("Font not found or unable to load the font. Please provide a valid font path.")
+
+    # Estimate the optimal font size by increasing it until the text fits within the zone
+    while draw.textsize(text, font)[0] < zone_width and draw.textsize(text, font)[1] < zone_height:
+        font_size += 1
+        font = ImageFont.truetype(font_path, font_size)
+
+    # Return the previous font size, which fits the text within the zone
+    return font_size - 1
+
+def place_text_on_image(image_path, top_left, bottom_right, text, font_path):
+    """
+    Place text on an image within the specified zone defined by the top-left and bottom-right coordinates.
+
+    Parameters:
+        image_path (str): The path to the image on which the text will be placed.
+        top_left (tuple): A tuple containing the (x, y) coordinates of the top-left corner of the zone.
+        bottom_right (tuple): A tuple containing the (x, y) coordinates of the bottom-right corner of the zone.
+        text (str): The text to be placed on the image.
+        font_path (str): The path to the TrueType font file (e.g., ".ttf") to be used.
+
+    Returns:
+        PIL.Image.Image: The resulting image with the text placed within the specified zone.
+    """
+    # Open the image
+    img = Image.open(image_path)
+    draw = ImageDraw.Draw(img)
+
+    # Get the coordinates of the zone
+    x1, y1 = top_left
+    x2, y2 = bottom_right
+    zone_width = x2 - x1
+    zone_height = y2 - y1
+
+    # Calculate the optimal font size to fit the text within the zone
+    font_size = get_optimal_font_size(text, font_path, zone_width, zone_height)
+
+    # Load the font with the calculated size
+    font = ImageFont.truetype(font_path, font_size)
+
+    # Calculate the position to center the text in the zone
+    text_width, text_height = draw.textsize(text, font)
+    x_centered = x1 + (zone_width - text_width) // 2
+    y_centered = y1 + (zone_height - text_height) // 2
+
+    # Place the text on the image
+    return draw.text((x_centered, y_centered), text, fill="black", font=font)
+
+
 def generate_image(event_name, lab, description, date, hour, location):
     """
     Generate an image for an instagram post based on a template
@@ -41,10 +111,10 @@ def generate_image(event_name, lab, description, date, hour, location):
     draw = ImageDraw.Draw(img)
     title_font = ImageFont.truetype("ressources/fonts/LeagueSpartan-Bold.ttf", 50)
     desc_font = ImageFont.truetype("ressources/fonts/LeagueSpartan-Bold.ttf", 40)
-    draw.text((150, 535), title, fill=(0, 0, 0), font=title_font)
-    draw.text((110, 250), f"{hour}", fill=(255, 255, 255), font=desc_font)
-    draw.text((830, 250), f"{date}", fill=(255, 255, 255), font=desc_font)
-    draw.text((450, 950), f"{location}", fill=(255, 255, 255), font=desc_font)
+
+    #Place text on image with the following command :
+    #place_text_on_image(image_path, top_left, bottom_right, text, font_path)
+
 
     # Save the generated image
     post_image_path = "output/generated_post.png"
