@@ -21,7 +21,7 @@ place_text_on_image(img, text_coord[0], text_coord[1], description, f"{FONTS_DIR
 
 Output : 
 
-<img src="output/generated_post.png" alt="alt text" width="500" height="500"><img src="readme_example.png" alt="alt text" width="500" height="500">
+<img src="output/generated_post.png" alt="alt text" width="300" height="300"><img src="readme_example.png" alt="alt text" width="300" height="300">
 
 
 ## Development setup
