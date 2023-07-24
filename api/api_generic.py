@@ -1,10 +1,15 @@
 import os
 import textwrap
 from PIL import Image, ImageDraw, ImageFont
-import openai
+import json
+#import openai
 
-openai.api_key = os.getenv("OPENAI_APIKEY")
+#openai.api_key = os.getenv("OPENAI_APIKEY")
 PROMPT_PATH = "api/generic/description_prompt.txt"
+
+WS_DATA_JSON = "/workspaces/AutomateCom/ressources/assets/workshop_img_data.json"
+WS_IMG_DIR = "/workspaces/AutomateCom/ressources/assets/workshop_img"
+FONTS_DIR = "/workspaces/AutomateCom/ressources/assets/fonts"
 
 def generate_text(title):
     """
@@ -43,29 +48,27 @@ def get_optimal_font_size(text, font_path, zone_width, zone_height):
         raise Exception("Font not found or unable to load the font. Please provide a valid font path.")
 
     # Estimate the optimal font size by increasing it until the text fits within the zone
-    while draw.textsize(text, font)[0] < zone_width and draw.textsize(text, font)[1] < zone_height:
+    while font.getsize(text)[0] < zone_width and font.getsize(text)[1] < zone_height:
         font_size += 1
         font = ImageFont.truetype(font_path, font_size)
 
     # Return the previous font size, which fits the text within the zone
     return font_size - 1
 
-def place_text_on_image(image_path, top_left, bottom_right, text, font_path):
+def place_text_on_image(img, top_left, bottom_right, text, font_path, COLOR):
     """
     Place text on an image within the specified zone defined by the top-left and bottom-right coordinates.
 
     Parameters:
-        image_path (str): The path to the image on which the text will be placed.
+        img (PIL.Image.Image): The image on which the text will be placed.
         top_left (tuple): A tuple containing the (x, y) coordinates of the top-left corner of the zone.
         bottom_right (tuple): A tuple containing the (x, y) coordinates of the bottom-right corner of the zone.
         text (str): The text to be placed on the image.
         font_path (str): The path to the TrueType font file (e.g., ".ttf") to be used.
 
     Returns:
-        PIL.Image.Image: The resulting image with the text placed within the specified zone.
+        None. The text is placed directly on the provided image.
     """
-    # Open the image
-    img = Image.open(image_path)
     draw = ImageDraw.Draw(img)
 
     # Get the coordinates of the zone
@@ -86,44 +89,40 @@ def place_text_on_image(image_path, top_left, bottom_right, text, font_path):
     y_centered = y1 + (zone_height - text_height) // 2
 
     # Place the text on the image
-    return draw.text((x_centered, y_centered), text, fill="black", font=font)
+    draw.text((x_centered, y_centered), text, fill=COLOR, font=font)
 
+def generate_image(info):
+    # ... (other parts of your code)
+    event_name, lab, description, date, hour, location = info
 
-def generate_image(event_name, lab, description, date, hour, location):
-    """
-    Generate an image for an instagram post based on a template
-    :param event_name: Title of the event
-    :param lab: Name of the lab doing the event
-    :param description: Description of the event
-    :param date: Date of the event
-    :param hour: Hour of the event
-    :param location: Location of the event
-    :return: image with all this information.
-    """
-    # Create the title and description for the Instagram post
-    title = f"{event_name}"
-    lines = textwrap.wrap(description, width=30)
-    description = "\n".join(lines)
-
-    # Generate the image with the post content -- NEED UPDATE
-    image_path = os.path.join("assets", f"{lab}.png")
+    # Generate the image with the post content
+    image_path = os.path.join(WS_IMG_DIR, f"{lab}.png")
     img = Image.open(image_path)
-    draw = ImageDraw.Draw(img)
-    title_font = ImageFont.truetype("ressources/fonts/LeagueSpartan-Bold.ttf", 50)
-    desc_font = ImageFont.truetype("ressources/fonts/LeagueSpartan-Bold.ttf", 40)
 
-    #Place text on image with the following command :
-    #place_text_on_image(image_path, top_left, bottom_right, text, font_path)
+    with open(WS_DATA_JSON, 'r', encoding='utf-8') as json_file:
+        data = dict(json.load(json_file))
+        json_file.close()
 
+    text_coord = [tuple(xy) for xy in data["workshop_img"]["desc_zone_coordinates"]]
+    time_coord = [tuple(xy) for xy in data["workshop_img"]["time_zone_coordinates"]]
+    date_coord = [tuple(xy) for xy in data["workshop_img"]["date_zone_coordinates"]]
+
+    print(text_coord,time_coord,date_coord)
+    # Place the description text on the image
+    place_text_on_image(img, text_coord[0], text_coord[1], description, f"{FONTS_DIR}/LeagueSpartan-Bold.ttf","black")
+    place_text_on_image(img, time_coord[0], time_coord[1], hour, f"{FONTS_DIR}/LeagueSpartan-Bold.ttf","white")
+    place_text_on_image(img, date_coord[0], date_coord[1], date, f"{FONTS_DIR}/LeagueSpartan-Bold.ttf","white")
 
     # Save the generated image
-    post_image_path = "output/generated_post.png"
+    post_image_path = "/workspaces/AutomateCom/output/generated_post.png"
     img.save(post_image_path)
     print("Instagram post generated!")
 
     # Display the image
     img.show()
 
+# ... (other parts of your code)
 
 if __name__ == '__main__':
-    pass
+    info = ["Programmation", "Coder", "description un peu longue pour voir le resize", "19/07", "21H", "NDC"]
+    generate_image(info)

@@ -1,44 +1,64 @@
 import os
 from api import *
-import click
 import logging
+import inquirer
+from halo import Halo
 
 from api import api_generic
+
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-
-@click.command()
-@click.option('--arg', prompt='ARG', type=int, help='Enter the ARG')
-def command_name():
-    """Description of the command"""
-    # Logic for the command
-    logger.info('Greet command invoked')
-    click.echo('This is an additional command.')
-
-
-@click.command()
-@click.option('--generate', prompt='Title', type=str, help='Enter the title to generate the text')
-def generate_text(title):
+class Colors:
     """
-    Use the generate_text() from the
-    api/api_generic script.
+
+    This class is an Enum that keep all the colors to use in our CLI interface.
     """
-    # Logic for the command
-    logger.info('Generate command invoked')
-    api_generic.generate_text(title)
-    click.echo('This is an additional command.')
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
+class CLI:
+    def __init__(self):
+        """halo_ = Halo(text="Bonjour et bienvenue :")
+        halo_.start()"""
+        self.options()
 
-@click.group()
-def cli():
-    """A collection of CLI commands"""
-    pass
+    def options(self):
+        options = [
+                inquirer.List('options',
+                        message="Options",
+                        choices=['Générer Crea WS',
+                                'Quitter'],
+                        carousel=True,)
+        ]
+        answer = inquirer.prompt(options)['options']
+        if answer == "Générer Crea WS":
+            self.generate_workshop()
+        elif answer == 'Quitter':
+            exit(0)
 
-
-cli.add_command(generate_text)
+    def generate_workshop(self):
+        info = ["event_name", "lab", "description", "date", "hour", "location"]
+        for e in info:
+            question = input(f"{e} ? :")
+            info[info.index(e)] = question
+        img = api_generic.generate_image(info)
+        img.show()
+        self.options()
 
 if __name__ == '__main__':
-    cli()
+    try:
+        cli = CLI()
+    except KeyboardInterrupt:
+        print("\n" + Colors.WARNING + "Arrêt du programme..." + Colors.ENDC)
+        sys.exit(0)
