@@ -12,7 +12,7 @@
 Test Usage : 
 
 > API Generic :
-> - GenerateImage : Need image assets as well as text zones for the differents texts. The text zones are where the text will be placed and resized
+> - GenerateImage : Need image assets as well as text zones for the differents texts. The text zones (in red) are where the text will be placed and resized
 > (the text in the zone in by default centered)
 
 ```py
@@ -21,8 +21,7 @@ place_text_on_image(img, text_coord[0], text_coord[1], description, f"{FONTS_DIR
 
 Output : 
 
-<img src="output/generated_post.png" alt="alt text" width="500" height="500">
-<img src="" alt="alt text" width="500" height="500">
+<img src="output/generated_post.png" alt="alt text" width="500" height="500"><img src="readme_example.png" alt="alt text" width="500" height="500">
 
 
 ## Development setup
