@@ -1,0 +1,5 @@
+{
+  "type": ["post","story"],
+  "post": ["workshop"],
+  "story": ["reminder","citation","poll","quiz","question"]
+}

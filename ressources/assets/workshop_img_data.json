@@ -1,8 +1,0 @@
-{
-    "labs" : ["IA", "Cyber", "Coder", "Meta", "Blockchain", "Maker"],
-    "workshop_img": {
-        "desc_zone_coordinates":[[121,487],[959,591]],
-        "time_zone_coordinates":[[121,223],[449,258]],
-        "date_zone_coordinates":[[800,223],[959,258]]
-    }
-}
