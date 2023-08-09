@@ -5,7 +5,7 @@
         "date":[[800,223],[959,258],"LeagueSpartan-Bold.ttf","white"],
         "location":"ignore"
     },
-    "story_workshop": {
-
+    "story": {
+        "title":[[108,244],[972,340],"LeagueSpartan-Bold.ttf","black"]
     }
 }
