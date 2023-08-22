@@ -6,7 +6,7 @@ import logging
 import inquirer
 from halo import Halo
 from typing import Union
-
+import json
 from api import api_generic
 
 EVENT_POSTS_TYPES = {
@@ -15,7 +15,7 @@ EVENT_POSTS_TYPES = {
     "post": ["workshop", "generated_image"],
     "story": ["classic", "reminder", "citation", "poll", "quiz", "question"],
 
-    "lab": ['IA', 'Cyber', 'Coder', 'Meta', 'Blockchain', 'Maker'],
+    "lab": ['General', 'IA', 'Cyber', 'Coder', 'Meta', 'Blockchain', 'Maker'],
 
     "info": ["event_name", "description", "date", "hour", "location"]
 }
@@ -55,7 +55,20 @@ class CLI:
         start()
 
     def setup(self):
-        pass
+        self.menu(
+            title="setup",
+            message="Mettez à jour les identifiants",
+            opt={
+                "Post": self.post,
+                "Story": self.story,
+                "Description": self.description,
+                "[BLOCK]": self.block
+            }
+        )()
+
+    def update_value(self, variable):
+        value = input(f"Update value {variable}: ")
+        os.environ[f"{variable}"] = value
 
     def menu(self, title: str, message: str, opt: dict) -> Union[classmethod, str]:
         """
@@ -124,13 +137,33 @@ class CLI:
             title="type",
             message="Choissisez un type de post",
             opt={
-                "Workshop": self.workshop
-                # "classic":,
+                "Workshop": self.workshop,
+                "Classic": self.story_classic,
                 # "reminder":,
                 # "citation":,
                 # "poll/quiz/question":,
             }
         )(tag="story")
+
+    def story_classic(self, tag):
+        infos = [
+            inquirer.List("lab",
+                          message="Selection lab",
+                          choices=EVENT_POSTS_TYPES["lab"],
+                          carousel=True, ),
+            inquirer.Text("title",
+                          message="Nom de l'évènement"),
+            inquirer.Text("text",
+                          message="Texte"),
+            inquirer.Text("date",
+                          message="Date (RESPECTEZ LE FORMAT *JJ MMM*, ex: 12 MAR)"),
+        ]
+        infos = inquirer.prompt(infos)
+        infos["tag"] = f"{tag}_classic"
+        print(infos)
+        print(list(infos.values())[:-1])
+        # img = api_generic.generate_image(list(infos.values()))
+        img = api_generic.generate_image(infos)
 
     def description(self):
         infos = [

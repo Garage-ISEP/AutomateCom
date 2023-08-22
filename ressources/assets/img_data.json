@@ -1,11 +1,15 @@
 {
     "post_workshop": {
-        "title":[[121,487],[959,591],"LeagueSpartan-Bold.ttf","black"],
-        "hour":[[121,223],[449,258],"LeagueSpartan-Bold.ttf","white"],
-        "date":[[800,223],[959,258],"LeagueSpartan-Bold.ttf","white"],
+        "title":[[121,487],[959,591],"CODE Bold.otf","black","center"],
+        "hour":[[121,223],[449,258],"LeagueSpartan-Bold.ttf","white","left"],
+        "date":[[800,223],[959,258],"LeagueSpartan-Bold.ttf","white","right"],
         "location":"ignore"
     },
-    "story": {
+    "story_workshop": {
         "title":[[108,244],[972,340],"LeagueSpartan-Bold.ttf","black"]
+    },
+    "story_classic": {
+        "title":[[108,244],[972,340],"Code Pro Bold.otf","black"],
+        "text": [[108,440],[972,960],"OpenSans-Regular.ttf","black"]
     }
 }

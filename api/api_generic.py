@@ -107,7 +107,6 @@ def place_text_on_image(img, top_left, bottom_right, text, font_path, COLOR):
     draw.text((x_centered, y_centered), text, fill=COLOR, font=font)
 
 
-# ... (other parts of your code)
 def generate_image(info: dict) -> str:
     """
     Generate an image with a template and the informations about the image.
