@@ -17,7 +17,9 @@ EVENT_POSTS_TYPES = {
 
     "lab": ['General', 'IA', 'Cyber', 'Coder', 'Meta', 'Blockchain', 'Maker'],
 
-    "info": ["event_name", "description", "date", "hour", "location"]
+    "info": ["event_name", "description", "date", "hour", "location"],
+
+    "workshop_difficulty": ["Débutant","Intermédiaire","Confirmé"]
 }
 
 # Configure logging
@@ -123,6 +125,10 @@ class CLI:
                           message="Heure (RESPECTEZ LE FORMAT *HH:MM*)"),
             inquirer.Text("location",
                           message="Localisation (EN UN MOT SI POSSIBLE)"),
+            inquirer.List("difficulty",
+                          message="Difficulté du Workshop",
+                          choices=EVENT_POSTS_TYPES["workshop_difficulty"],
+                          carousel=True, )
         ]
         infos = inquirer.prompt(infos)
         infos["tag"] = f"{tag}_workshop"
