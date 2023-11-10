@@ -15,11 +15,11 @@ EVENT_POSTS_TYPES = {
     "post": ["workshop", "generated_image"],
     "story": ["classic", "reminder", "citation", "poll", "quiz", "question"],
 
-    "lab": ['General', 'IA', 'Cyber', 'Coder', 'Meta', 'Blockchain', 'Maker'],
+    "lab": ['General', 'IA', 'Cyber', 'Coder', 'Virtual', 'Blockchain', 'Maker'],
 
     "info": ["event_name", "description", "date", "hour", "location"],
 
-    "workshop_difficulty": ["Débutant","Intermédiaire","Confirmé"]
+    "difficulty": ["Débutant", "Intermédiaire", "Confirmé"]
 }
 
 # Configure logging
@@ -45,16 +45,18 @@ class Colors:
 
 class CLI:
     def __init__(self):
-        start = self.menu(
+        self.start()
+
+    def start(self):
+        self.menu(
             title="Menu d'accueil",
             message="Choissisez une option dans le menu d'accueil",
             opt={
                 "Générer Créa": self.event,
                 "Setup": self.setup,
-                "Quitter": "quit"
+                "Quitter": self.close
             }
-        )
-        start()
+        )()
 
     def setup(self):
         self.menu(
@@ -64,7 +66,6 @@ class CLI:
                 "Post": self.post,
                 "Story": self.story,
                 "Description": self.description,
-                "[BLOCK]": self.block
             }
         )()
 
@@ -98,7 +99,6 @@ class CLI:
                 "Post": self.post,
                 "Story": self.story,
                 "Description": self.description,
-                "[BLOCK]": self.block
             }
         )()
 
@@ -120,23 +120,35 @@ class CLI:
             inquirer.Text("title",
                           message="Nom de l'évènement"),
             inquirer.Text("date",
-                          message="Date (RESPECTEZ LE FORMAT *JJ MMM*, ex: 12 MAR)"),
-            inquirer.Text("hour",
-                          message="Heure (RESPECTEZ LE FORMAT *HH:MM*)"),
-            inquirer.Text("location",
-                          message="Localisation (EN UN MOT SI POSSIBLE)"),
+                          message="Date au complet (Exemple: MERCREDI 12 NOVEMBRE) :"),
+            inquirer.Text("hour_location",
+                          message="Heure et lieu (Exemple : 18H, L012)"),
             inquirer.List("difficulty",
                           message="Difficulté du Workshop",
-                          choices=EVENT_POSTS_TYPES["workshop_difficulty"],
-                          carousel=True, )
+                          choices=EVENT_POSTS_TYPES["difficulty"],
+                          carousel=True, ),
+            inquirer.Text("keywords",
+                          message="(Optionel) 3 mots-clés pour le WS, séparés d'une virgule:"
+            )
         ]
         infos = inquirer.prompt(infos)
-        infos["tag"] = f"{tag}_workshop"
+        keywords = infos["keywords"].split(",")
+        print(keywords)
+        if len(keywords):
+            for keyword in keywords:
+                infos[f"keyword{keywords.index(keyword)+1}"] = keyword
+        infos.pop("keywords")
+        for key in infos:
+            if key is not ("lab" or "tag"):
+                infos[key] = infos[key].upper()
+        #infos["lab"] = infos["lab"].lower()
+        infos["tag"] = f"{tag}_workshop".lower()
         print(infos)
         print(list(infos.values())[:-1])
         # img = api_generic.generate_image(list(infos.values()))
         img = api_generic.generate_image(infos)
         # img.show()
+        self.start()
 
     def story(self):
         self.menu(
@@ -168,8 +180,7 @@ class CLI:
         infos["tag"] = f"{tag}_classic"
         print(infos)
         print(list(infos.values())[:-1])
-        # img = api_generic.generate_image(list(infos.values()))
-        img = api_generic.generate_image(infos)
+        api_generic.generate_image(infos)
 
     def description(self):
         infos = [
@@ -178,13 +189,6 @@ class CLI:
         ]
         description = api_generic.generate_text(inquirer.prompt(infos)["description"])
         print(description)
-
-    def block(self):
-        infos = [
-            inquirer.Text("block",
-                          message="Veuillez donner le lien du fichier CSV contenant les events a créer")
-        ]
-        description = api_generic.generate_text(inquirer.prompt(infos)["block"])
 
     def close(self):
         exit(0)

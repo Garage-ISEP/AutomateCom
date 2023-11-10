@@ -8,14 +8,23 @@ import openai
 openai.api_key = os.getenv("OPENAI_APIKEY")
 PROMPT_PATH = "api/generic/description_prompt.txt"
 
-#ASSETS = "ressources/assets"
-ASSETS = "/Users/emm3rsk/PycharmProjects/pythonProject1/AutomateCom/ressources/assets"
-OUTPUT_DIR = "/Users/emm3rsk/PycharmProjects/pythonProject1/AutomateCom/output/"
+ASSETS = "ressources/assets"
+OUTPUT_DIR = "output"
 
 DATA_JSON = os.path.join(ASSETS, "img_data.json")
 POST_WS_DIR = os.path.join(ASSETS, "post_workshop")
 FONTS_DIR = os.path.join(ASSETS, "fonts")
 
+LABS_COLORS = {
+    "Coder": "#dc251f",
+    "Blockchain": "#ffbf29",
+    "Cyber": "#fe831e",
+    "IA": "#11ad8b",
+    "Maker": "#11a1dc",
+    "Virtual": "#1e3dae",
+}
+
+FONT_OFFSET = 5
 
 def generate_text(title, prompt_path=PROMPT_PATH):
     """
@@ -68,23 +77,22 @@ def get_optimal_font_size(text, font_path, zone_width, zone_height):
     return font_size - 1
 
 
-def place_text_on_image(img, top_left, bottom_right, text, font_path, COLOR):
+def place_text_on_image(img, top_left, bottom_right, text, font_path, COLOR, align):
     """
     Place text on an image within the specified zone defined by the top-left and bottom-right coordinates.
 
     Parameters:
-        :param COLOR: The color of the text that will be placed.
         :param img: The image on which the text will be placed.
         :param top_left: A tuple containing the (x, y) coordinates of the top-left corner of the zone.
         :param bottom_right: A tuple containing the (x, y) coordinates of the bottom-right corner of the zone.
         :param text: The text to be placed on the image.
         :param font_path: The path to the TrueType font file (e.g., ".ttf") to be used.
-
+        :param COLOR: The color of the text that will be placed.
+        :param align: The way the text is going to be aligned.
     Returns:
         None. The text is placed directly on the provided image.
     """
     draw = ImageDraw.Draw(img)
-    print(top_left, text)
     # Get the coordinates of the zone
     x1, y1 = top_left
     x2, y2 = bottom_right
@@ -92,7 +100,7 @@ def place_text_on_image(img, top_left, bottom_right, text, font_path, COLOR):
     zone_height = y2 - y1
 
     # Calculate the optimal font size to fit the text within the zone
-    font_size = get_optimal_font_size(text, font_path, zone_width, zone_height)
+    font_size = get_optimal_font_size(text, font_path, zone_width, zone_height) - FONT_OFFSET
 
     # Load the font with the calculated size
     font = ImageFont.truetype(font_path, font_size)
@@ -100,8 +108,20 @@ def place_text_on_image(img, top_left, bottom_right, text, font_path, COLOR):
     # Calculate the position to center the text in the zone
     text_width, text_height = draw.textbbox((0, 0), text, font=font)[2:]
 
-    x_centered = x1 + (zone_width - text_width) // 2
-    y_centered = y1 + (zone_height - text_height) // 2
+    #x_centered = x1 + (zone_width - text_width) // 2
+    if align == "left":
+        x_centered = x1
+    elif align == "right":
+        x_centered = x1 + zone_width - text_width
+    else:  # default to center
+        x_centered = x1 + (zone_width - text_width) // 2
+
+    # Calculate vertical center of the zone
+    zone_center_y = y1 + zone_height // 2
+
+    # Adjust y_position so that text is centered vertically
+    y_centered = zone_center_y - text_height // 2
+    #y_centered = y1 + (zone_height - text_height) // 2
 
     # Place the text on the image
     draw.text((x_centered, y_centered), text, fill=COLOR, font=font)
@@ -124,17 +144,21 @@ def generate_image(info: dict) -> str:
     image_input = Image.open(os.path.join(ASSETS, f"{tag}/{info['lab']}.png"))
 
     for coord in list(data.keys()):
-        print(coord, data[coord])
         if data[coord] == "ignore":
             continue
         else:
+            #print(f"info coord 4 = {data[coord][4]}")
             place_text_on_image(image_input, tuple(data[coord][0]), tuple(data[coord][1]), info[coord],
-                                f"{FONTS_DIR}/{data[coord][2]}", data[coord][3])
+                                f"{FONTS_DIR}/{data[coord][2]}", LABS_COLORS[f"{info['lab']}"], data[coord][4])
 
     image_output = os.path.join(OUTPUT_DIR, f"{tag}_{info['date'].replace(' ', '_')}.png")
-    image_input.save(image_output)
-    print("Instagram post generated!")
-    return image_output
+    try:
+        image_input.save(image_output)
+    except FileNotFoundError:
+        print("Dossier ou fichier introuvable.")
+
+    print("Post generated!")
+    #return image_output
 
 
 if __name__ == '__main__':
