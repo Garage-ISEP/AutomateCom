@@ -5,9 +5,14 @@
 
 ## Installation
 
-/!\ A définir /!\
+```bash
+git clone -b test https://github.com/Garage-ISEP/AutomateCom.git
+```
 
 ## Usage example
+
+Start main.py and follow the UI.
+Example: To generate a post for a workshop : Post -> Workshop -> Add informations -> *Generated image is in /output.*
 
 Test Usage : 
 
